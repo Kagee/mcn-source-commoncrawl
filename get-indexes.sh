@@ -13,10 +13,15 @@ do
   FOLDER="${STORAGE_PATH}/$API_ENDPOINT"
   METADATA="$FOLDER/metadata"
   mkdir -p "$FOLDER";
-  if [ ! -f "${METADATA}" ]; then
+  PAGES="$(cat ${FOLDER}/metadata | jq -r .pages)" 2>/dev/null
+  if [ ! -f "${METADATA}" ] || [ "x$PAGES" = "x" ]; then
     curl -s "http://index.commoncrawl.org/${API_ENDPOINT}-index?url=*.no&output=json&showNumPages=true" > "$METADATA"
+    PAGES="$(cat ${FOLDER}/metadata | jq -r .pages)"
   fi
-  if [ $(cat ${FOLDER}/metadata| jq -r .pages) -eq $(ls $FOLDER | grep -v metadata | wc -l) ]; then
+  FILES="$(ls $FOLDER | grep -v metadata | wc -l)"
+  #echo "Pages: $PAGES, Files: $FILES"
+
+  if [ $PAGES -eq $FILES ]; then
     echo "Found $(find $FOLDER -type f ! -name metadata | wc -l) of $(cat ${FOLDER}/metadata| jq -r .pages) expected files for $API_ENDPOINT, assuming complete"
   else
     echo -n "$API_ENDPOINT ";
