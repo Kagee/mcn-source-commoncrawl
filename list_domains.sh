@@ -7,9 +7,10 @@ source "./config.sh"
 
 set -euo pipefail
 #set -x
-trap "kill 0" SIGINT
 
-if [ ! -e *"$DOMAINS" ] || [ "x$1" = "x--update-list" ]; then
+
+COUNT="$(find . -name "*$DOMAINS" 2>/dev/null | wc -l)";
+if [ "$COUNT" -eq "0" ] || [ "x$1" = "x--update-list" ]; then
     echo >&2 "[INFO] $DOMAINS not found, extracting ..."
     # We do some hacks to remove the number of false positive domains
     # urldecode: 20finn.no -> 
