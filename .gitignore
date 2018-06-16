@@ -2,3 +2,4 @@ data/CC-*
 data/no-cache/*
 *.list
 *.noborg
+_tmp*
