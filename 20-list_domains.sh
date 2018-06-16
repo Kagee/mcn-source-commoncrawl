@@ -20,8 +20,8 @@ if [ "$COUNT" -eq "0" ] || [ "x${1:-}" = "x--update-list" ]; then
     TIMESTAMP="$(date +%F%T | tr ':' '-')"
     mkdir -p "$STORAGE_PATH/no-cache"
 
-    find "$STORAGE_PATH/" -type f -name '*.gz' | \
-      ( while read -r FILE; do
+    find "$STORAGE_PATH/" -type f -name '*.gz' > _tmp.gzs
+    while read -r FILE; do
           MD="$STORAGE_PATH/no-cache/$(md5sum "$FILE" | cut -d' ' -f 1).xz";
           if [ ! -f "$MD" ]; then
             echo >&2 "[INFO] Processing $FILE into $MD";
@@ -32,11 +32,12 @@ if [ "$COUNT" -eq "0" ] || [ "x${1:-}" = "x--update-list" ]; then
           else
             echo >&2 "[INFO] Found $MD, not processing $FILE"
           fi
-        done
-    ) && \
+    done < _tmp.gzs
+  exit
+      #  && \
       find "$STORAGE_PATH/no-cache" -name '*.xz' -exec xzcat '{}' \;| \
       "$MCN_TOOLS/default_extract" | \
-      cat - ./*"$DOMAINS" 2>/dev/null | sort | uniq > "_tmp.list" && \
+      cat - ./*"$DOMAINS" || true  | sort | uniq > "_tmp.list" && \
       mv "_tmp.list" "$TIMESTAMP-$DOMAINS"
 else
     echo >&2 "[INFO] $DOMAINS found. Use '$0 --update-list' to force new extraction."
