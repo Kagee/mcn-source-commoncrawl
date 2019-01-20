@@ -41,9 +41,9 @@ export -f def_ex
 export LOG_INFO
 export LOG_VERB
 
-COUNT="$(find . -name "*$DOMAINS" 2>/dev/null | wc -l)";
+COUNT="$(find . -name "$OUTFILE" 2>/dev/null | wc -l)";
 if [ "$COUNT" -eq "0" ] || [ "x${1:-}" = "x--update-list" ]; then
-  INFO "*$DOMAINS not found, extracting ..."
+  INFO "$OUTFILE not found, extracting ..."
 
   TIMESTAMP="$(date +%F-%T | tr ':' '-')"
   EXTRACT_CACHE="$STORAGE_PATH/ext-cache"
