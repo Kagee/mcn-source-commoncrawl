@@ -7,9 +7,9 @@ source "./config.sh"
 
 set -euo pipefail
 #set -x
-
+OUTFILE="$(date +%F)-$DOMAINS"
 LOG_INFO=1
-LOG_VERB=1
+LOG_VERB=0
 
 function def_ex {
   GZ_FILE="${1:-}"
@@ -43,23 +43,29 @@ export LOG_VERB
 
 COUNT="$(find . -name "*$DOMAINS" 2>/dev/null | wc -l)";
 if [ "$COUNT" -eq "0" ] || [ "x${1:-}" = "x--update-list" ]; then
-  INFO "$DOMAINS not found, extracting ..."
+  INFO "*$DOMAINS not found, extracting ..."
 
   TIMESTAMP="$(date +%F-%T | tr ':' '-')"
   EXTRACT_CACHE="$STORAGE_PATH/ext-cache"
   mkdir -p "$EXTRACT_CACHE"
-  GZ_FILES="$(mktemp "$PWD/$TIMESTAMP-XXXXXXXXXX")"
+  GZ_FILES="$(mktemp "$PWD/gz-files-$TIMESTAMP-XXXXXXXXXX.tmp")"
   find "$STORAGE_PATH/" -type f -name '*.gz' > "$GZ_FILES"
+  
+  # Parallel extraction of domains from all gzs, stored to xz
   cat "$GZ_FILES" | parallel def_ex '{}' "$EXTRACT_CACHE" "$MCN_TOOLS" '{#}'
   echo "$GZ_FILES"
   rm "$GZ_FILES"
-  #find "$STORAGE_PATH/no-cache" -name '*.xz' | \
-  #sort | uniq | parallel -P "$(echo "$(nproc --all) * 2" | bc)" def_ex '{#}' '{}'
-  #exit 
-  #  cat ./*"$DOMAINS" > "_tmp.list"
-  #  find "$STORAGE_PATH/no-cache" -name '*.no' > "_tmp.list"
-  #  cat "_tmp.list" | sort | uniq > "_tmp.list2" && mv "_tmp.list2" "$TIMESTAMP-$DOMAINS"
-  #  rm "_tmp.list"
+  mv output/* old/
+  EXTRACT_TMP="$(mktemp "$PWD/ET-$TIMESTAMP-XXXXXXXXXX")"
+  EXTRACT_TMP2="$(mktemp "$PWD/ET2-$TIMESTAMP-XXXXXXXXXX")"
+  find "$EXTRACT_CACHE" -name '*.xz' | \
+  while read -r EXTRACT; do
+    xzcat "$EXTRACT" >> "$EXTRACT_TMP";
+  done
+  sort "$EXTRACT_TMP" | uniq > "$EXTRACT_TMP2" && \
+  mv "$EXTRACT_TMP2" "output/$OUTFILE"
+  rm "$EXTRACT_TMP"
+  INFO "Extraction complete. Saved to output/$OUTFILE"
 else
     INFO "$DOMAINS found. Use '$0 --update-list' create a new extract."
 fi
