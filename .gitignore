@@ -1,5 +1,6 @@
 data/CC-*
 data/no-cache/*
+*/ext-cache
 *.list
 *.noborg
 _tmp*
