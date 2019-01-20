@@ -4,3 +4,4 @@ data/no-cache/*
 *.list
 *.noborg
 _tmp*
+*.tmp
