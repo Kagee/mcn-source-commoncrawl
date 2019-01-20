@@ -11,3 +11,7 @@ Howto:
 * ./get-indexes.sh
 * ./verify-indexes.sh
 * ./list_domains.sh
+
+Source: http://commoncrawl.org
+Description: Looks for domains in data from the Common Crawl project.
+Credit: This result uses data from the Common Crawl Foundation, their term of service may be found here http://commoncrawl.org/terms-of-use/

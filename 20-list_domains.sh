@@ -6,6 +6,7 @@ cd "$SOURCE_DIR" || exit
 source "./config.sh"
 
 set -euo pipefail
+#set -o pipefail
 #set -x
 OUTFILE="$(date +%F)-$DOMAINS"
 LOG_INFO=1
@@ -53,9 +54,9 @@ if [ "$COUNT" -eq "0" ] || [ "x${1:-}" = "x--update-list" ]; then
   
   # Parallel extraction of domains from all gzs, stored to xz
   cat "$GZ_FILES" | parallel def_ex '{}' "$EXTRACT_CACHE" "$MCN_TOOLS" '{#}'
-  echo "$GZ_FILES"
+  #echo "$GZ_FILES"
   rm "$GZ_FILES"
-  mv output/* old/
+  mv output/* old/ 2>/dev/null || true
   EXTRACT_TMP="$(mktemp "$PWD/ET-$TIMESTAMP-XXXXXXXXXX")"
   EXTRACT_TMP2="$(mktemp "$PWD/ET2-$TIMESTAMP-XXXXXXXXXX")"
   find "$EXTRACT_CACHE" -name '*.xz' | \
@@ -63,7 +64,7 @@ if [ "$COUNT" -eq "0" ] || [ "x${1:-}" = "x--update-list" ]; then
     xzcat "$EXTRACT" >> "$EXTRACT_TMP";
   done
   sort "$EXTRACT_TMP" | uniq > "$EXTRACT_TMP2" && \
-  mv "$EXTRACT_TMP2" "output/$OUTFILE"
+  mv "$EXTRACT_TMP2" "./output/$OUTFILE"
   rm "$EXTRACT_TMP"
   INFO "Extraction complete. Saved to output/$OUTFILE"
 else
