@@ -38,6 +38,10 @@ do
     # Defaults to Commoncrawer, so we don't supply a server URL
     ${WD}/${CLIENT} --processes ${THREADS} --coll "${ID}" '*.fr' --fl url -z;
     cd "$WD";
+    # If you don't want to keep the urls, only the domains, do something with the data here, i.e
+    # zcat ${FOLDER}/*.gz | sed -e 's#^https\?://##' | cut -d/ -f 1 | sort | uniq > ${ID}.domains
+    # You can then delete the raw data before downloading more
+    # rm -r ${FOLDER}
   fi
   #sleep 5;
 done;
